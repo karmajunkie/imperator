@@ -14,10 +14,6 @@ class Commando::Command
     self.params[:id] = UUIDTools::UUID.timestamp_create.to_s if self.params[:id].nil?
   end
 
-  def valid?
-    true
-  end
-
   def attributes
     params
   end

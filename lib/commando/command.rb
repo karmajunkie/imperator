@@ -76,7 +76,6 @@ class Commando::Command
 
   def perform
     raise "You need to define the perform block for #{self.class.name}" unless self.class.perform_block
-    debugger
     self.instance_exec(&self.class.perform_block)
   end
 
@@ -85,14 +84,13 @@ class Commando::Command
   end
 
   def method_missing(method, *args)
-    puts "method missing"
     method_root = method.to_s.gsub(/=$/, "")
     if method.to_s[/=$/]
       self.attributes[method_root] = args.first
     elsif attributes.has_key?(method_root)
       self.attributes[method]
     else
-      #super
+      super
     end
   end
 end

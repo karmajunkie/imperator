@@ -6,16 +6,41 @@ class Commando::Command
   include ActiveModel::Serializers::JSON
 
 
-  attr_accessor :params
   cattr_accessor :commit_mode
+  attr_accessor :attributes
 
-  def initialize(params={})
-    self.params = HashWithIndifferentAccess.new params.dup
-    self.params[:id] = UUIDTools::UUID.timestamp_create.to_s if self.params[:id].nil?
+  class << self
+    attr_accessor :perform_block
   end
 
-  def attributes
-    params
+  def self.perform(&block)
+    @perform_block = block
+  end
+
+  def self.property(property_name)
+
+    define_method(property_name) do
+      @attributes[property_name]
+    end
+    define_method("#{property_name}=") do |val|
+      @attributes[property_name] = val
+    end
+  end
+
+  def read_attribute_for_validation(key)
+    @attributes[key]
+  end
+
+
+  def initialize(params={})
+    @attributes = HashWithIndifferentAccess.new params.dup
+    @attributes[:id] = UUIDTools::UUID.timestamp_create.to_s if @attributes[:id].nil?
+  end
+
+  alias_method :params, :attributes
+
+  def as_json
+    attributes.as_json
   end
 
   def persisted?
@@ -33,7 +58,7 @@ class Commando::Command
   end
 
   def dump
-    params.to_json
+    attributes.to_json
   end
 
   def self.load(command_string)
@@ -41,7 +66,7 @@ class Commando::Command
   end
 
   def load(command_string)
-    self.params = HashWithIndifferentAccess.new(JSON.parse(command_string))
+    self.attributes = HashWithIndifferentAccess.new(JSON.parse(command_string))
   end
 
   def perform!
@@ -50,7 +75,9 @@ class Commando::Command
   end
 
   def perform
-    raise "You need to override #perform in #{self.class.name}"
+    raise "You need to define the perform block for #{self.class.name}" unless self.class.perform_block
+    debugger
+    self.instance_exec(&self.class.perform_block)
   end
 
   def id
@@ -58,15 +85,14 @@ class Commando::Command
   end
 
   def method_missing(method, *args)
+    puts "method missing"
     method_root = method.to_s.gsub(/=$/, "")
-    if params.has_key?(method_root)
-      if method.to_s[/=$/]
-        self.params[method_root] = args.first
-      else
-        self.params[method]
-      end
+    if method.to_s[/=$/]
+      self.attributes[method_root] = args.first
+    elsif attributes.has_key?(method_root)
+      self.attributes[method]
     else
-      super
+      #super
     end
   end
 end

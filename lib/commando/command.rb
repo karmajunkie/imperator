@@ -1,13 +1,13 @@
 class Commando::Command
-  include ActiveModel::Naming
-  include ActiveModel::Validations
-  include ActiveModel::Conversion
-  include ActiveModel::Serialization
-  include ActiveModel::Serializers::JSON
+  include ActiveAttr::Model
+  extend ActiveModel::Callbacks
 
+  define_model_callbacks :create, :perform, :initialize
 
   cattr_accessor :commit_mode
-  attr_accessor :attributes
+  attribute :id
+
+  after_initialize :set_uuid
 
   class << self
     attr_accessor :perform_block
@@ -15,26 +15,6 @@ class Commando::Command
 
   def self.perform(&block)
     @perform_block = block
-  end
-
-  def self.property(property_name)
-
-    define_method(property_name) do
-      @attributes[property_name]
-    end
-    define_method("#{property_name}=") do |val|
-      @attributes[property_name] = val
-    end
-  end
-
-  def read_attribute_for_validation(key)
-    @attributes[key]
-  end
-
-
-  def initialize(params={})
-    @attributes = HashWithIndifferentAccess.new params.dup
-    @attributes[:id] = UUIDTools::UUID.timestamp_create.to_s if @attributes[:id].nil?
   end
 
   alias_method :params, :attributes
@@ -57,6 +37,12 @@ class Commando::Command
     self.perform
   end
 
+  def initialize(*)
+    run_callbacks :initialize do
+      super
+    end
+  end
+
   def dump
     attributes.to_json
   end
@@ -76,11 +62,9 @@ class Commando::Command
 
   def perform
     raise "You need to define the perform block for #{self.class.name}" unless self.class.perform_block
-    self.instance_exec(&self.class.perform_block)
-  end
-
-  def id
-    params[:id]
+    run_callbacks :perform do 
+      self.instance_exec(&self.class.perform_block)
+    end
   end
 
   def method_missing(method, *args)
@@ -92,5 +76,10 @@ class Commando::Command
     else
       super
     end
+  end
+
+  private 
+  def set_uuid
+    self.id = UUIDTools::UUID.timestamp_create.to_s if self.id.nil?
   end
 end

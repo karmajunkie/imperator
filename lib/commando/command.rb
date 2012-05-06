@@ -13,7 +13,7 @@ class Commando::Command
     attr_accessor :perform_block
   end
 
-  def self.perform(&block)
+  def self.action(&block)
     @perform_block = block
   end
 

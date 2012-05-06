@@ -63,5 +63,8 @@ Commands can also be used on forms in place of ActiveRecord models.
       end
     end
 
+###Using a command in the background (Delayed::Job)
+    Delayed::Job.enqueue command
+
 
 		  

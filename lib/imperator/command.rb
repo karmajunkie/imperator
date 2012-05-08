@@ -1,4 +1,5 @@
-class Commando::Command
+require 'uuidtools'
+class Imperator::Command
   include ActiveAttr::Model
   extend ActiveModel::Callbacks
 
@@ -28,7 +29,7 @@ class Commando::Command
   end
 
   def commit!
-    raise Commando::InvalidCommandError.new "Command was invalid" unless valid?
+    raise Imperator::InvalidCommandError.new "Command was invalid" unless valid?
     self.commit
   end
 

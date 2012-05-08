@@ -1,3 +1,0 @@
-class InvalidCommandError < ArgumentError
-
-end

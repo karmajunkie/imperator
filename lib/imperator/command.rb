@@ -15,7 +15,7 @@ class Imperator::Command
   end
 
   def self.action(&block)
-    @perform_block = block
+    define_method(:raw_perform, &block)
   end
 
   alias_method :params, :attributes
@@ -61,11 +61,13 @@ class Imperator::Command
     self.perform
   end
 
+  # @abstract
+  def raw_perform
+    raise "You need to define the perform block for #{self.class.name}"
+  end
+
   def perform
-    raise "You need to define the perform block for #{self.class.name}" unless self.class.perform_block
-    run_callbacks :perform do 
-      self.instance_exec(&self.class.perform_block)
-    end
+    run_callbacks(:perform) { raw_perform }
   end
 
   def method_missing(method, *args)

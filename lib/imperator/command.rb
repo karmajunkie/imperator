@@ -1,18 +1,22 @@
 require 'uuidtools'
+require 'active_model'
+require 'virtus'
 class Imperator::Command
-  include ActiveAttr::Model
+  include ActiveModel::Validations
   extend ActiveModel::Callbacks
+  include Virtus
+
+  if defined? ActiveModel::Serializable
+    include ActiveModel::Serializable::JSON
+    include ActiveModel::Serializable::XML
+  else
+    include ActiveModel::Serializers::JSON
+    include ActiveModel::Serializers::Xml
+  end
 
   define_model_callbacks :create, :perform, :initialize
 
-  cattr_accessor :commit_mode
-  attribute :id
-
-  after_initialize :set_uuid
-
-  class << self
-    attr_accessor :perform_block
-  end
+  attribute :id, String, :default => proc { UUIDTools::UUID.timestamp_create.to_s }
 
   def self.action(&block)
     define_method(:action, &block)
@@ -20,8 +24,8 @@ class Imperator::Command
 
   alias_method :params, :attributes
 
-  def as_json
-    attributes.as_json
+  def as_json(*args)
+    attributes.as_json(*args)
   end
 
   def persisted?
@@ -68,21 +72,5 @@ class Imperator::Command
 
   def perform
     run_callbacks(:perform) { action }
-  end
-
-  def method_missing(method, *args)
-    method_root = method.to_s.gsub(/=$/, "")
-    if method.to_s[/=$/]
-      self.attributes[method_root] = args.first
-    elsif attributes.has_key?(method_root)
-      self.attributes[method]
-    else
-      super
-    end
-  end
-
-  private 
-  def set_uuid
-    self.id = UUIDTools::UUID.timestamp_create.to_s if self.id.nil?
   end
 end

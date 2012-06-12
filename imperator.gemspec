@@ -23,5 +23,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "pry"
   # s.add_runtime_dependency "rest-client"
   s.add_runtime_dependency "uuidtools"
-  s.add_runtime_dependency "active_attr"
+  s.add_runtime_dependency "activemodel"
+  s.add_runtime_dependency "virtus"
 end

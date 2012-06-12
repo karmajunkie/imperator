@@ -17,8 +17,8 @@ describe Imperator::Command do
 
   describe "attributes" do
     class AttributeCommand < Imperator::Command
-      attribute :gets_default, :default => "foo"
-      attribute :declared_attr
+      attribute :gets_default, String, :default => "foo"
+      attribute :declared_attr, String
     end
 
     it "throws away undeclared attributes in mass assignment" do
@@ -38,6 +38,13 @@ describe Imperator::Command do
     it "overrides default when supplied in constructor args" do
       command = AttributeCommand.new :gets_default => "bar"
       command.gets_default.should == "bar"
+    end
+
+    it "will create attributes as json" do
+      command = AttributeCommand.new
+      command.as_json.should == {"id" => command.id,
+                                 "gets_default" => "foo",
+                                 "declared_attr" => nil}
     end
   end
 

@@ -3,15 +3,39 @@ describe Imperator::Command do
 
   describe "#perform" do
     class CommandTestException < Exception; end
-    class TestCommand < Imperator::Command
-      action do
-        raise CommandTestException.new 
+    context "using DSL " do
+      class DSLTestCommand < Imperator::Command
+        action do
+          raise CommandTestException.new 
+        end
+      end
+
+      let(:command){DSLTestCommand.new}
+      it "runs the action block when #perform is called" do
+        lambda{command.perform}.should raise_exception(CommandTestException)
       end
     end
 
-    let(:command){TestCommand.new}
-    it "runs the action block when #perform is called" do
-      lambda{command.perform}.should raise_exception(CommandTestException)
+    context "using method definition" do
+      class MethodTestCommand < Imperator::Command
+        def action 
+          raise CommandTestException.new
+        end
+      end
+      let(:command){MethodTestCommand.new}
+      it "runs the action method when #perform is called" do
+        lambda{command.perform}.should raise_exception(CommandTestException)
+      end
+    end
+  end
+
+  describe "actions" do
+    context "using DSL" do
+      class ActionDSLExampleCommand < Imperator::Command
+        action do
+
+        end
+      end
     end
   end
 

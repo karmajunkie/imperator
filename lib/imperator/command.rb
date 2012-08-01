@@ -17,12 +17,19 @@ class Imperator::Command
   define_model_callbacks :create, :perform, :initialize
 
   attribute :id, String, :default => proc { UUID.generate }
+  attribute :object, Object
 
   def self.action(&block)
     define_method(:action, &block)
   end
 
   alias_method :params, :attributes
+
+  def to_s
+    str = "Command: #{id}"
+    str << " - #{object}" if object
+    str
+  end
 
   def as_json(*args)
     attributes.as_json(*args)

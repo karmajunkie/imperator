@@ -24,6 +24,7 @@ class Imperator::Command
       #   ..
       # end
       def create_rest action, model, options = {}, &block
+        options.reverse_merge! default_options
         parent = options[:parent] || default_rest_class
         create_rest_all(model, options = {}, &block) and return if action.to_sym == :all
         if rest_actions.include? action.to_sym        
@@ -38,6 +39,13 @@ class Imperator::Command
       def default_rest_class
         @default_rest_class ||= Imperator::Command::Restfull
       end
+
+      attr_writer :default_options
+
+      def default_options
+        @default_options ||= {}
+      end
+
 
       protected
 
@@ -73,4 +81,14 @@ class Imperator::Command
       end
     end
   end
+end
+
+# Global macro methods
+
+def create_command action, model, options = {}, &block
+  Imperator::Command::ClassFactory.create action, model, options = {}, &block
+end
+
+def create_rest_command action, model, options = {}, &block
+  Imperator::Command::ClassFactory.create_rest action, model, options = {}, &block
 end

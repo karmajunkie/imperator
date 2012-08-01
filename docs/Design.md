@@ -153,7 +153,6 @@ end
 It is especially handy for creating Rest Command wrappers.
 
 ```ruby
-
 Imperator::Command::ClassFactory.use do |factory|
   factory.default_rest_class = Imperator::Mongoid::RestCommand
   factory.create_rest :all, Post do
@@ -163,7 +162,7 @@ Imperator::Command::ClassFactory.use do |factory|
   end
 
   factory.create_rest :update, Article do
-    attributes_for Article
+    attributes_for Article, only: [:title, :body] 
 
     on_error do
       puts "Oops! There was an error!"
@@ -171,7 +170,7 @@ Imperator::Command::ClassFactory.use do |factory|
   end
 
   # Same using :auto_attributes option
-  factory.create_rest :update, Article, auto_attributes: true do
+  factory.create_rest :update, Article, auto_attributes: true, except: [:status] do
     on_error do
       puts "Oops! There was an error!"
     end
@@ -179,4 +178,20 @@ Imperator::Command::ClassFactory.use do |factory|
 end
 ```
 
+## Using ClassFactory macros
 
+There are also two global macros `create_command` and `create_rest_command` available.
+
+```ruby
+# ensure all attributes of model are reflected in Command (if adaptor makes it possible)
+Imperator::Command::ClassFactory.default_options = {auto_attributes: true}
+
+module PostController
+  class Update < UpdateCommandAction
+
+    command do
+      @command ||= create_rest_command(:update, Post).new object_hash
+    end
+  end
+end
+```

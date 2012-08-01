@@ -97,3 +97,86 @@ module PostController
   end
 end
 ```
+
+## Restfull Commands
+
+If you inherit from the `Imperator::Command::Restfull` class, you gain access to the
+REST convenience methods: `update`, `delete` and `create_new` which creates action methods with some default appropriate REST logic for the particular action.
+See the code for more info on how to use this for your own needs.
+
+```ruby
+class UpdatePostCommand < Imperator::Command::Restfull
+  attribute :some_object_id
+  attribute :some_value
+
+  validates_presence_of :some_object_id
+
+  update do
+    puts "updated OK"
+  end
+end
+```
+
+## Mongoid integration
+
+Imperator also comes with a little Mongodi adaptor class, which provides the `attributes_for` method in order to easily redefine Mongoid model fields as Command attributes. Similar adaptors could be created for other ORMs such as Active Record etc.
+
+```ruby
+class UpdatePostCommand < Imperator::Mongoid::RestCommand
+
+  attributes_for Post, except: [:status, :rating]
+
+  validates :name, presence: true
+
+  update do    
+    puts "#{object} was updated"
+  end
+
+  on_error do
+    puts "The Post could not be updated: #{object}"
+  end
+end
+```
+
+## Class Factory
+
+The `Imperator::Command::ClassFactory` can be used to easily create Command wrappers for your model classes.
+
+```ruby
+Imperator::Command::ClassFactory.create :publish, Post do
+  action do
+    find_object.publish!
+  end
+end
+```
+
+It is especially handy for creating Rest Command wrappers.
+
+```ruby
+
+Imperator::Command::ClassFactory.use do |factory|
+  factory.default_rest_class = Imperator::Mongoid::RestCommand
+  factory.create_rest :all, Post do
+    on_error do
+      puts "Oops! There was an error!"
+    end
+  end
+
+  factory.create_rest :update, Article do
+    attributes_for Article
+
+    on_error do
+      puts "Oops! There was an error!"
+    end
+  end
+
+  # Same using :auto_attributes option
+  factory.create_rest :update, Article, auto_attributes: true do
+    on_error do
+      puts "Oops! There was an error!"
+    end
+  end
+end
+```
+
+

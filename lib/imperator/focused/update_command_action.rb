@@ -1,17 +1,12 @@
 require 'imperator/focused/command_action'
 
-class Imperator
-  module Focused
-    class UpdateCommandAction < CommandAction
+class Imperator::Focused::UpdateCommandAction < CommandAction
+  protected
 
-      protected
+  delegate :invalid_path, :to => :edit_path
 
-      delegate :invalid_path, :to => :edit_path
-
-      def edit_path
-        "edit_#{resource_class_name}_path"
-      end
-    end
+  def edit_path
+    "edit_#{resource_class_name}_path"
   end
 end
 

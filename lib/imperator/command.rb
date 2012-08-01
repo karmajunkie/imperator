@@ -1,6 +1,7 @@
 require 'uuid'
 require 'active_model'
 require 'virtus'
+
 class Imperator::Command
   include ActiveModel::Validations
   extend ActiveModel::Callbacks
@@ -24,6 +25,10 @@ class Imperator::Command
   end
 
   alias_method :params, :attributes
+
+  def self.attributes_for clazz, options = {}
+    raise NotImplementedError
+  end
 
   def to_s
     str = "Command: #{id}"

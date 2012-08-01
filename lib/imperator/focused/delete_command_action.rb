@@ -1,17 +1,12 @@
 require 'imperator/focused/command_action'
 
-class Imperator
-  module Focused
-    class DeleteCommandAction < CommandAction
+class Imperator::Focused::DeleteCommandAction < CommandAction
+  protected
 
-      protected
+  delegate :invalid_path, :to => :index_path
 
-      delegate :invalid_path, :to => :index_path
-
-      def index_path
-        "#{resource_class_name.pluralize}_path"
-      end
-    end
+  def index_path
+    "#{resource_class_name.pluralize}_path"
   end
 end
 

@@ -6,17 +6,30 @@ class Imperator::Command
         yield self
       end
 
+      def default_parent clazz
+        @default_parent ||= clazz
+      end
+
+      def get_default_parent
+        @default_default_parent ||= ::Imperator::Command
+      end
+
       # Usage:
       # Imperator::Command::ClassFactory.create :update, Post, parent: Imperator::Mongoid::Command do
       #   ..
       # end
       def create action, model, options = {}, &block
-        parent = options[:parent] || Imperator::Command
-        clazz = Class.new parent do
+        clazz_name = "#{action.to_s.camelize}#{model.to_s.camelize}Command"
+        parent ||= options[:parent] || get_default_parent
+        clazz = parent ? Class.new(parent) : Class.new
+        Kernel.const_set clazz_name, clazz
+        clazz = self.const_get(clazz_name)
+        clazz.class_eval do
           attributes_for(model, :except => options[:except]) if options[:auto_attributes]
-          yield
         end
-        Kernel.const_set "#{action}#{model}Command", clazz
+        if block_given?
+          clazz.class_eval &block      
+        end
       end
 
       # Usage:

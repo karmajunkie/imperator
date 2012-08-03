@@ -84,5 +84,6 @@ class Imperator::Command
 
   def perform
     run_callbacks(:perform) { action }
+    self
   end
 end

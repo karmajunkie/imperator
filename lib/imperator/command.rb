@@ -1,6 +1,7 @@
-require 'uuidtools'
+require 'uuid'
 require 'active_model'
 require 'virtus'
+
 class Imperator::Command
   include ActiveModel::Validations
   extend ActiveModel::Callbacks
@@ -16,13 +17,24 @@ class Imperator::Command
 
   define_model_callbacks :create, :perform, :initialize
 
-  attribute :id, String, :default => proc { UUIDTools::UUID.timestamp_create.to_s }
+  attribute :id, String, :default => proc { UUID.generate }
+  attribute :object, Object
 
   def self.action(&block)
     define_method(:action, &block)
   end
 
   alias_method :params, :attributes
+
+  def self.attributes_for clazz, options = {}
+    raise NotImplementedError
+  end
+
+  def to_s
+    str = "Command: #{id}"
+    str << " - #{object}" if object
+    str
+  end
 
   def as_json(*args)
     attributes.as_json(*args)
@@ -72,5 +84,6 @@ class Imperator::Command
 
   def perform
     run_callbacks(:perform) { action }
+    self
   end
 end

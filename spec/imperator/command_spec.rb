@@ -66,8 +66,7 @@ describe Imperator::Command do
 
     it "will create attributes as json" do
       command = AttributeCommand.new
-      command.as_json.should == {"id" => command.id,
-                                 "gets_default" => "foo",
+      command.as_json.should == { "gets_default" => "foo",
                                  "declared_attr" => nil}
     end
   end

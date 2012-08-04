@@ -4,3 +4,7 @@ source "http://rubygems.org"
 gemspec
 
 gem "pry", :group => [:test, :development]
+group :test do
+  gem "rspec"
+  gem "rspec-mocks"
+end

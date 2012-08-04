@@ -1,4 +1,3 @@
-require 'uuidtools'
 require 'active_model'
 require 'virtus'
 class Imperator::Command
@@ -16,7 +15,6 @@ class Imperator::Command
 
   define_model_callbacks :create, :perform, :initialize
 
-  attribute :id, String, :default => proc { UUIDTools::UUID.timestamp_create.to_s }
 
   def self.action(&block)
     define_method(:action, &block)

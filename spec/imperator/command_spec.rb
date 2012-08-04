@@ -1,7 +1,7 @@
 require 'imperator'
 describe Imperator::Command do
 
-  describe "#perform" do
+  describe "actions" do
     class CommandTestException < Exception; end
     context "using DSL " do
       class DSLTestCommand < Imperator::Command
@@ -25,16 +25,6 @@ describe Imperator::Command do
       let(:command){MethodTestCommand.new}
       it "runs the action method when #perform is called" do
         lambda{command.perform}.should raise_exception(CommandTestException)
-      end
-    end
-  end
-
-  describe "actions" do
-    context "using DSL" do
-      class ActionDSLExampleCommand < Imperator::Command
-        action do
-
-        end
       end
     end
   end

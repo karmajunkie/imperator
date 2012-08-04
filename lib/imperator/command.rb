@@ -1,20 +1,6 @@
-require 'active_model'
 require 'virtus'
 class Imperator::Command
-  include ActiveModel::Validations
-  extend ActiveModel::Callbacks
   include Virtus
-
-  if defined? ActiveModel::Serializable
-    include ActiveModel::Serializable::JSON
-    include ActiveModel::Serializable::XML
-  else
-    include ActiveModel::Serializers::JSON
-    include ActiveModel::Serializers::Xml
-  end
-
-  define_model_callbacks :create, :perform, :initialize
-
 
   def self.action(&block)
     define_method(:action, &block)
@@ -41,13 +27,7 @@ class Imperator::Command
   end
 
   def initialize(*)
-    run_callbacks :initialize do
-      super
-    end
-  end
-
-  def dump
-    attributes.to_json
+    super
   end
 
   def self.load(command_string)
@@ -69,6 +49,7 @@ class Imperator::Command
   end
 
   def perform
-    run_callbacks(:perform) { action }
+    action
   end
+
 end

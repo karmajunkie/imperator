@@ -1,4 +1,5 @@
 require 'imperator'
+require 'rspec/mocks'
 describe Imperator::Command do
 
   describe "actions" do
@@ -6,7 +7,7 @@ describe Imperator::Command do
     context "using DSL " do
       class DSLTestCommand < Imperator::Command
         action do
-          raise CommandTestException.new 
+          raise CommandTestException.new
         end
       end
 
@@ -52,12 +53,6 @@ describe Imperator::Command do
     it "overrides default when supplied in constructor args" do
       command = AttributeCommand.new :gets_default => "bar"
       command.gets_default.should == "bar"
-    end
-
-    it "will create attributes as json" do
-      command = AttributeCommand.new
-      command.as_json.should == { "gets_default" => "foo",
-                                 "declared_attr" => nil}
     end
   end
 

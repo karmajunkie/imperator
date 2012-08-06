@@ -11,9 +11,12 @@ Commands can also be regarded as the contexts from DCI.
 ###Validation 
 Commands also give you an appropriate place to handle interaction validation. Validation is most often regarded as a responsibility of the data model. This is a poor fit, because the idea of what's valid for data is very temporally tied to the understanding of the business domain at the time the data was created. Data that's valid today may well be invalid tomorrow, and when that happens you're going to run into a situation where your ActiveRecord models will refuse to work with old data that is no longer valid. Commands don't absolve you of the need to migrate your data when business requirements change, but they do let you move validation to the interaction where it belongs.
 
-`Imperator::Command`'s are ActiveModel objects, which gives you a lot of flexibility both in and out of Rails projects. Validations are included, as is serialization support. Imperator intends to support all major queueing systems in the Rails ecosystem out of the box, including DelayedJob and Resque. The standard validations for ActiveModel are included, though not the ones that ActiveRecord provides such as `#validates_uniqueness_of`.
-
-Commands can also be used on forms in place of ActiveRecord models. 
+Commands can also be used on forms in place of ActiveRecord models, when
+the ActiveModel::Naming interface is included in the command class.
+Imperator doesn't have a dependency on
+ActiveRecord/ActiveModel/ActiveSupport, but readily supports most of the
+AM interfaces like validations.  These are trivial to include so support
+is not built into Imperator intentionally.
 
 ###TODO
 * test coverage—Imperator was extracted out of some other work, and coverage was a part of those test suites.
@@ -22,8 +25,7 @@ Commands can also be used on forms in place of ActiveRecord models.
 #Using Imperator
 
 ##Requirements:
-* ActiveSupport 3.0 or higher
-* ActiveAttr
+* Virtus (https://github.com/solnic/virtus)
 
 ##Installation
  In your Gemfile:
@@ -48,6 +50,20 @@ Commands can also be used on forms in place of ActiveRecord models.
     end
 
 ###Using a command on a form builder
+First, you'll need to make your commands adhere to ActiveModel's naming
+interface:
+
+    #Gemfile
+    gem "activemodel"
+
+    #commands
+    class DoSomethingCommand < Imperator::Command
+      include ActiveModel::Naming
+      #...
+    end
+
+Then you can use them on a form just as you would a model:
+
     <%= form_for(@command, :as => :do_something, :url => some_resource_path(@command.some_object_id), :method => :put) do |f| %>
     ...
     <% end %>

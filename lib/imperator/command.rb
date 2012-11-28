@@ -1,12 +1,14 @@
 require 'virtus'
 class Imperator::Command
   include Virtus
+  extend Imperator::Config
 
   def self.action(&block)
     define_method(:action, &block)
   end
 
   alias_method :params, :attributes
+
 
   def as_json(*args)
     attributes.as_json(*args)
@@ -17,13 +19,12 @@ class Imperator::Command
   end
 
   def commit!
-    raise Imperator::InvalidCommandError.new "Command was invalid" unless valid?
+    check_valid_command
     self.commit
   end
 
   def commit
-    #TODO: background code for this
-    self.perform
+    self.class.background_processor.commit(self)
   end
 
   def initialize(*)
@@ -34,12 +35,20 @@ class Imperator::Command
     self.new(JSON.parse(command_string))
   end
 
+  def self.background_processor
+    @background_processor ||= superclass.background_processor || Imperator::NullBackgroundProcessor
+  end
+
+  def self.background_processor=(backgrounder)
+    @background_processor = backgrounder
+  end
+
   def load(command_string)
     self.attributes = HashWithIndifferentAccess.new(JSON.parse(command_string))
   end
 
   def perform!
-    raise InvalidCommandError.new "Command was invalid" unless valid?
+    check_valid_command
     self.perform
   end
 
@@ -50,6 +59,13 @@ class Imperator::Command
 
   def perform
     action
+  end
+
+  private
+  def check_valid_command
+    if self.respond_to?(:valid?)
+      raise InvalidCommandError.new "Command was invalid" unless valid?
+    end
   end
 
 end

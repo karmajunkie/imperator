@@ -1,5 +1,6 @@
 require 'imperator'
 require 'rspec/mocks'
+require 'imperator/test_background_processor'
 describe Imperator::Command do
 
   describe "actions" do
@@ -30,6 +31,20 @@ describe Imperator::Command do
     end
   end
 
+  describe "performing" do
+    it "bang version doesn't raise exception if validations not enabled" do
+      class PerformBangValidCommand < Imperator::Command
+        attribute :foo, String
+        def action
+          "this is fine"
+        end
+      end
+
+      lambda{PerformBangValidCommand.new.perform!}.should_not raise_exception(Imperator::InvalidCommandError)
+      lambda{PerformBangValidCommand.new.commit!}.should_not raise_exception(Imperator::InvalidCommandError)
+    end
+  end
+
   describe "attributes" do
     class AttributeCommand < Imperator::Command
       attribute :gets_default, String, :default => "foo"
@@ -53,6 +68,39 @@ describe Imperator::Command do
     it "overrides default when supplied in constructor args" do
       command = AttributeCommand.new :gets_default => "bar"
       command.gets_default.should == "bar"
+    end
+  end
+
+  describe "#commit" do
+    before do
+      Imperator::Command.background_processor = Imperator::TestBackgroundProcessor
+    end
+
+    after do
+      Imperator::Command.background_processor = Imperator::NullBackgroundProcessor
+    end
+
+    class TestCommand < Imperator::Command
+      attribute :foo, String
+      def action
+      end
+    end
+
+    context "subclassed commands" do
+      class SubTestCommand < TestCommand
+
+      end
+      it "commits like the parent class" do
+        command = SubTestCommand.new(:foo => "bar") 
+        command.commit
+        Imperator::TestBackgroundProcessor.commits.should include(command)
+      end
+    end
+
+    it "sends the command into the configured background processor" do
+      command = TestCommand.new(:foo => "bar") 
+      command.commit
+      Imperator::TestBackgroundProcessor.commits.should include(command)
     end
   end
 

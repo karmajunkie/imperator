@@ -84,6 +84,30 @@ Then you can use them on a form just as you would a model:
 ###Using a command in the background (Delayed::Job)
     Delayed::Job.enqueue command
 
+###Using a background processor
+You can create a custom background processor very easily. It merely
+needs to implement the class method `#commit`
+
+    class Imperator::NullBackgroundProcessor
+      def self.commit(command, options = nil)
+        command.perform
+      end
+    end
+
+You can also pass options to the background processor either by the
+command or instance
+
+    class CompletePurchase < Imperator::Command
+      background :queue => "high"
+      
+      def action
+      end
+    end
+
+    command = CompletePurchase.new
+    command.commit(:queue => "low")
+
+
 ###Contributors
 Many thanks to the following contributors for bugfixes, testing, and
 additional functionality

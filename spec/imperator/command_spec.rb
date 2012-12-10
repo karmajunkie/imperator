@@ -1,5 +1,5 @@
-require 'imperator'
 require 'rspec/mocks'
+require 'imperator'
 require 'imperator/test_background_processor'
 describe Imperator::Command do
 
@@ -86,14 +86,29 @@ describe Imperator::Command do
       end
     end
 
-    context "subclassed commands" do
+    context "in subclassed commands" do
       class SubTestCommand < TestCommand
-
+        background :any_option => :foo
       end
       it "commits like the parent class" do
         command = SubTestCommand.new(:foo => "bar") 
         command.commit
         Imperator::TestBackgroundProcessor.commits.should include(command)
+      end
+
+      context "with background options" do
+        it "receives background options" do
+          command = SubTestCommand.new(:foo => "bar") 
+          Imperator::TestBackgroundProcessor.should_receive(:commit).with(command, :any_option => :foo)
+          command.commit
+        end
+
+        it "receives options supplied on the command instance" do
+          command = SubTestCommand.new(:foo => "bar") 
+          Imperator::TestBackgroundProcessor.should_receive(:commit).with(command, :any_option => :bar)
+          command.commit(:any_option => :bar)
+
+        end
       end
     end
 

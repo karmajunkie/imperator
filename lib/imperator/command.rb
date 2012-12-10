@@ -23,8 +23,8 @@ class Imperator::Command
     self.commit
   end
 
-  def commit
-    self.class.background_processor.commit(self)
+  def commit(options = nil)
+    self.class.background_processor.commit(self, options || self.class.background_options)
   end
 
   def initialize(*)
@@ -32,7 +32,15 @@ class Imperator::Command
   end
 
   def self.load(command_string)
-    self.new(JSON.parse(command_string))
+   self.new(JSON.parse(command_string))
+  end
+
+  def self.background(options = {})
+    @background_options = options
+  end
+
+  def self.background_options
+    @background_options 
   end
 
   def self.background_processor

@@ -4,7 +4,7 @@ class Imperator::TestBackgroundProcessor
     attr_accessor :commits
   end
 
-  def self.commit(command)
+  def self.commit(command, options = nil) 
     @commits << command
   end
 end

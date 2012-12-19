@@ -6,5 +6,6 @@ class Imperator::TestBackgroundProcessor
 
   def self.commit(command, options = nil) 
     @commits << command
+    command.perform!
   end
 end

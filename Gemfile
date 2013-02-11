@@ -7,4 +7,5 @@ gem "pry", :group => [:test, :development]
 group :test do
   gem "rspec"
   gem "rspec-mocks"
+  gem "debugger"
 end

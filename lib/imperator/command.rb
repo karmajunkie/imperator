@@ -72,7 +72,7 @@ class Imperator::Command
   private
   def check_valid_command
     if self.respond_to?(:valid?)
-      raise InvalidCommandError.new "Command was invalid" unless valid?
+      raise Imperator::InvalidCommandError.new "Command was invalid" unless valid?
     end
   end
 

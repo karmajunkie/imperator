@@ -32,7 +32,7 @@ describe Imperator::Command do
   end
 
   describe "performing" do
-    it "bang version doesn't raise exception if validations not enabled" do
+    context "bang version" do 
       class PerformBangValidCommand < Imperator::Command
         attribute :foo, String
         def action
@@ -40,8 +40,18 @@ describe Imperator::Command do
         end
       end
 
-      lambda{PerformBangValidCommand.new.perform!}.should_not raise_exception(Imperator::InvalidCommandError)
-      lambda{PerformBangValidCommand.new.commit!}.should_not raise_exception(Imperator::InvalidCommandError)
+      it "bang version doesn't raise exception if validations not enabled" do
+        lambda{PerformBangValidCommand.new.perform!}.should_not raise_exception(Imperator::InvalidCommandError)
+        lambda{PerformBangValidCommand.new.commit!}.should_not raise_exception(Imperator::InvalidCommandError)
+      end
+
+      it "raises an exception if the command is invalid" do
+        command = PerformBangValidCommand.new
+        command.stub(:valid?).and_return(false)
+        lambda{command.perform!}.should raise_exception(Imperator::InvalidCommandError)
+        lambda{command.commit!}.should  raise_exception(Imperator::InvalidCommandError)
+
+      end
     end
   end
 

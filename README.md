@@ -45,7 +45,6 @@ is not built into Imperator intentionally.
       action do
         obj = SomeObject.find(self.some_object_id)
         obj.do_something(self.some_value)
-        end
       end
     end
 

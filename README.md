@@ -29,13 +29,13 @@ is not built into Imperator intentionally.
 
 ##Installation
  In your Gemfile:
-
-    gem 'imperator'
-
+```ruby
+gem 'imperator'
+```
 ##Usage
 
 ###Creating the command:
-
+```ruby
     class DoSomethingCommand < Imperator::Command
       attribute :some_object_id
       attribute :some_value
@@ -47,27 +47,32 @@ is not built into Imperator intentionally.
         obj.do_something(self.some_value)
       end
     end
-
+```
 ###Using a command on a form builder
 First, you'll need to make your commands adhere to ActiveModel's naming
 interface:
 
-    #Gemfile
+In your Gemfile:
+```ruby
     gem "activemodel"
+```
 
-    #commands
+Your Command class:
+```ruby
     class DoSomethingCommand < Imperator::Command
       include ActiveModel::Naming
       #...
     end
+```
 
 Then you can use them on a form just as you would a model:
-
+```ruby
     <%= form_for(@command, :as => :do_something, :url => some_resource_path(@command.some_object_id), :method => :put) do |f| %>
     ...
     <% end %>
-
+```
 ###Using a command
+```ruby
     class SomeController < ApplicationController
       def update
         command = DoSomethingCommand.new(params[:do_something])
@@ -79,23 +84,24 @@ Then you can use them on a form just as you would a model:
         end
       end
     end
-
+```
 ###Using a command in the background (Delayed::Job)
+```ruby
     Delayed::Job.enqueue command
-
+```
 ###Using a background processor
 You can create a custom background processor very easily. It merely
 needs to implement the class method `#commit`
-
+```ruby
     class Imperator::NullBackgroundProcessor
       def self.commit(command, options = nil)
         command.perform
       end
     end
-
+```
 You can also pass options to the background processor either by the
 command or instance
-
+```ruby
     class CompletePurchase < Imperator::Command
       background :queue => "high"
       
@@ -105,7 +111,7 @@ command or instance
 
     command = CompletePurchase.new
     command.commit(:queue => "low")
-
+```
 
 ###Contributors
 Many thanks to the following contributors for bugfixes, testing, and

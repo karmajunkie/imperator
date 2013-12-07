@@ -1,6 +1,6 @@
 require 'virtus'
 class Imperator::Command
-  include Virtus
+  include Virtus.model
   extend Imperator::Config
 
   def self.action(&block)
@@ -9,6 +9,25 @@ class Imperator::Command
 
   alias_method :params, :attributes
 
+  def self.string(attr_name, options={})
+    attribute attr_name, String, options
+  end
+
+  def self.integer(attr_name, options={})
+    attribute attr_name, Integer, options
+  end
+
+  def self.float(attr_name, options={})
+    attribute attr_name, Float, options
+  end
+
+  def self.boolean(attr_name, options={})
+    attribute attr_name, Boolean, options
+  end
+
+  def self.datetime(attr_name, options={})
+    attribute attr_name, DateTime, options
+  end
 
   def as_json(*args)
     attributes.as_json(*args)

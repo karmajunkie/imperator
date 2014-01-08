@@ -120,5 +120,6 @@ additional functionality
 * Jason Staten (@statianzo)
 * Jay Adkisson (@jayferd)
 * Nick Maloney (@nmaloney)
+* Grégory Horion (@gregory)
 
 		  

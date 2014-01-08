@@ -14,25 +14,25 @@ describe Imperator::Command do
 
       let(:command){DSLTestCommand.new}
       it "runs the action block when #perform is called" do
-        lambda{command.perform}.should raise_exception(CommandTestException)
+        expect{command.perform}.to raise_exception(CommandTestException)
       end
     end
 
     context "using method definition" do
       class MethodTestCommand < Imperator::Command
-        def action 
+        def action
           raise CommandTestException.new
         end
       end
       let(:command){MethodTestCommand.new}
       it "runs the action method when #perform is called" do
-        lambda{command.perform}.should raise_exception(CommandTestException)
+        expect{command.perform}.to raise_exception(CommandTestException)
       end
     end
   end
 
   describe "performing" do
-    context "bang version" do 
+    context "bang version" do
       class PerformBangValidCommand < Imperator::Command
         attribute :foo, String
         def action
@@ -41,15 +41,15 @@ describe Imperator::Command do
       end
 
       it "bang version doesn't raise exception if validations not enabled" do
-        lambda{PerformBangValidCommand.new.perform!}.should_not raise_exception(Imperator::InvalidCommandError)
-        lambda{PerformBangValidCommand.new.commit!}.should_not raise_exception(Imperator::InvalidCommandError)
+        expect{PerformBangValidCommand.new.perform!}.not_to raise_exception(Imperator::InvalidCommandError)
+        expect{PerformBangValidCommand.new.commit!}.not_to raise_exception(Imperator::InvalidCommandError)
       end
 
       it "raises an exception if the command is invalid" do
         command = PerformBangValidCommand.new
         command.stub(:valid?).and_return(false)
-        lambda{command.perform!}.should raise_exception(Imperator::InvalidCommandError)
-        lambda{command.commit!}.should  raise_exception(Imperator::InvalidCommandError)
+        expect{command.perform!}.to raise_exception(Imperator::InvalidCommandError)
+        expect{command.commit!}.to  raise_exception(Imperator::InvalidCommandError)
 
       end
     end
@@ -63,7 +63,7 @@ describe Imperator::Command do
 
     it "throws away undeclared attributes in mass assignment" do
       command = AttributeCommand.new(:undeclared_attr => "foo")
-      lambda{command.undeclared_attr}.should raise_exception(NoMethodError)
+      expect{command.undeclared_attr}.to raise_exception(NoMethodError)
     end
 
     it "accepts declared attributes in mass assignment" do
@@ -101,20 +101,20 @@ describe Imperator::Command do
         background :any_option => :foo
       end
       it "commits like the parent class" do
-        command = SubTestCommand.new(:foo => "bar") 
+        command = SubTestCommand.new(:foo => "bar")
         command.commit
         Imperator::TestBackgroundProcessor.commits.should include(command)
       end
 
       context "with background options" do
         it "receives background options" do
-          command = SubTestCommand.new(:foo => "bar") 
+          command = SubTestCommand.new(:foo => "bar")
           Imperator::TestBackgroundProcessor.should_receive(:commit).with(command, :any_option => :foo)
           command.commit
         end
 
         it "receives options supplied on the command instance" do
-          command = SubTestCommand.new(:foo => "bar") 
+          command = SubTestCommand.new(:foo => "bar")
           Imperator::TestBackgroundProcessor.should_receive(:commit).with(command, :any_option => :bar)
           command.commit(:any_option => :bar)
 
@@ -123,7 +123,7 @@ describe Imperator::Command do
     end
 
     it "sends the command into the configured background processor" do
-      command = TestCommand.new(:foo => "bar") 
+      command = TestCommand.new(:foo => "bar")
       command.commit
       Imperator::TestBackgroundProcessor.commits.should include(command)
     end

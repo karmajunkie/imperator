@@ -37,6 +37,8 @@ gem 'imperator'
 ###Creating the command:
 ```ruby
     class DoSomethingCommand < Imperator::Command
+      include ActiveModel::Validations
+      
       attribute :some_object_id
       attribute :some_value
 

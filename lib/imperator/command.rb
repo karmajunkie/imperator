@@ -3,7 +3,7 @@ require 'virtus'
 class Imperator::Command
   include ActiveModel::Validations
   extend ActiveModel::Callbacks
-  include Virtus
+  include Virtus.model
 
   if defined? ActiveModel::Serializable
     include ActiveModel::Serializable::JSON
@@ -15,12 +15,11 @@ class Imperator::Command
 
   define_model_callbacks :create, :perform, :initialize
 
-
   def self.action(&block)
     define_method(:action, &block)
   end
 
-  alias_method :params, :attributes
+  alias params attributes
 
   def as_json(*args)
     attributes.as_json(*args)
@@ -31,13 +30,13 @@ class Imperator::Command
   end
 
   def commit!
-    raise Imperator::InvalidCommandError.new "Command was invalid" unless valid?
-    self.commit
+    raise Imperator::InvalidCommandError, 'Command was invalid' unless valid?
+    commit
   end
 
   def commit
-    #TODO: background code for this
-    self.perform
+    # TODO: background code for this
+    perform
   end
 
   def initialize(*)
@@ -51,7 +50,7 @@ class Imperator::Command
   end
 
   def self.load(command_string)
-    self.new(JSON.parse(command_string))
+    new(JSON.parse(command_string))
   end
 
   def load(command_string)
@@ -59,13 +58,13 @@ class Imperator::Command
   end
 
   def perform!
-    raise InvalidCommandError.new "Command was invalid" unless valid?
-    self.perform
+    raise InvalidCommandError, 'Command was invalid' unless valid?
+    perform
   end
 
   # @abstract
   def action
-    raise NoMethodError.new("Please define #action for #{self.class.name}")
+    raise NoMethodError, "Please define #action for #{self.class.name}"
   end
 
   def perform
